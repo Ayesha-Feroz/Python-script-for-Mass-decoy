@@ -1,0 +1,61 @@
+from pyopenms import *
+from matplotlib import pyplot as plt
+seq = AASequence.fromString("MQHELQPDSLVDLKFIMADTGFGKTFIYDRIKSGDLPKAKVIHGRARWLYRDHCEFKNKLLSRANG") # create AASequence object from string representation
+
+prefix = seq.getPrefix(4) # extract prefix of length
+suffix = seq.getSuffix(5) # extract suffix of length 5
+concat = seq + seq # concatenate two sequences
+
+# print string representation of sequences
+print("Sequence:", seq)
+print("Prefix:", prefix)
+print("Suffix:", suffix)
+print("Concatenated:", concat)
+
+# some mass calculations
+mfull = seq.getMonoWeight() # weight of M
+mprecursor = seq.getMonoWeight(Residue.ResidueType.Full, 2) # weight of M+2H
+
+# we can calculate mass-over-charge manually
+mz = seq.getMonoWeight(Residue.ResidueType.Full, 2) / 2.0 # m/z of [M+2H]2+
+# or simply by:
+mz = seq.getMZ(2) # same as above
+
+print()
+print("Monoisotopic mass of peptide [M] is", mfull)
+seq = AASequence.fromString("MQHELQPDSLVDLKFIMADTGFGKTFIYDRIKSGDLPKAKVIHGRARWLYRDHCEFKNKLLSRANG")
+seq_formula = seq.getFormula()
+print("Peptide", seq, "has molecular formula", seq_formula)
+# print coarse isotope distribution
+coarse_isotopes = seq_formula.getIsotopeDistribution( CoarseIsotopePatternGenerator(60) )
+for iso in coarse_isotopes.getContainer():
+    print ("Isotope", iso.getMZ(), "has abundance", iso.getIntensity()*100, "%")
+    import math
+
+
+
+
+def plotIsotopeDistribution(isotope_distribution, title="Isotope distribution"):
+    plt.title(title)
+    distribution = {"mass": [], "abundance": []}
+    for iso in isotope_distribution.getContainer():
+        distribution["mass"].append(iso.getMZ())
+        distribution["abundance"].append(iso.getIntensity() * 100)
+
+    bars = plt.bar(distribution["mass"], distribution["abundance"], width=0.04, snap=False, color='red') # snap ensures that all bars are rendered
+
+    plt.ylim([0, 110])
+    plt.xticks(range(math.ceil(distribution["mass"][0]) - 2,
+                     math.ceil(distribution["mass"][-1]) + 2))
+    plt.xlabel("Atomic mass (u)")
+    plt.ylabel("Relative abundance (%)")
+
+plt.figure(figsize=(27,27))
+plt.subplot(1,2,1)
+plotIsotopeDistribution(coarse_isotopes, "Isotope distribution - coarse")
+plt.show()
+x= mfull;
+minimum_number = 0.00175* x
+print ("the product is:", minimum_number)
+maximum_number = 0.00083* x
+print ("the product is" , maximum_number)
